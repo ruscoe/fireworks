@@ -22,8 +22,8 @@ struct Firework {
   int expand_rate;
 };
 
-void create_firework(int x, int y, int index);
-void update_fireworks(Display *display, Window window, GC gc, struct Firework fireworks[MAX_FIREWORKS]);
+void create_firework(int x, int y, int index, struct Firework *fireworks);
+void update_fireworks(Display *display, Window window, GC gc, struct Firework *fireworks);
 void expandFirework(Display *display, Window window, GC gc, int x, int y);
 
 int main(void) {
@@ -88,10 +88,11 @@ int main(void) {
     if (num_ready_fds > 0) {
       if ((event.type == ButtonPress) && (event.xbutton.button == Button1)) {
         XSetForeground(display, gc, color.pixel);
-        XDrawPoint(display, window, gc, event.xbutton.x, event.xbutton.y);
+        // XDrawPoint(display, window, gc, event.xbutton.x, event.xbutton.y);
 
         // Create a new firework at the mouse cursor location.
-        create_firework(event.xbutton.x, event.xbutton.y, 0);
+        create_firework(event.xbutton.x, event.xbutton.y, fireworks_index, fireworks);
+        update_fireworks(display, window, gc, fireworks);
       }
     } else if (num_ready_fds == 0) {
       // Timer interval reached; update active fireworks.
@@ -109,14 +110,29 @@ int main(void) {
   return 0;
 }
 
-void create_firework(int x, int y, int index) {
+void create_firework(int x, int y, int index, struct Firework *fireworks) {
+  struct Firework fw;
 
+  fw.x = x;
+  fw.y = y;
+  fw.radius = 12;
+  fw.max_radius = 128;
+  fw.expand_rate = 2;
+
+  fireworks[index] = fw;
 }
 
-void update_fireworks(Display *display, Window window, GC gc, struct Firework fireworks[MAX_FIREWORKS]) {
-  //Firework firework = fireworks[0];
+void update_fireworks(Display *display, Window window, GC gc, struct Firework *fireworks) {
+  struct Firework fw = fireworks[0];
 
-  //expandFirework(display, window, gc, event.xbutton.x, event.xbutton.y);
+  XDrawPoint(display, window, gc, fw.x, fw.y);
+
+  XDrawArc(display, window, gc, (fw.x - (fw.radius / 2)),
+    (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
+
+
+
+  // expandFirework(display, window, gc, event.xbutton.x, event.xbutton.y);
 }
 
 void expandFirework(Display *display, Window window, GC gc, int x, int y) {
