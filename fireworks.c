@@ -23,7 +23,7 @@ struct Firework {
   char color[7];
 };
 
-void createFirework(int x, int y, int index, struct Firework *fireworks);
+void createFirework(int x, int y, int index, char *colors, struct Firework *fireworks);
 void updateFireworks(Display *display, Window window, GC gc, Colormap colormap, XColor color, struct Firework *fireworks);
 
 int main(void) {
@@ -38,13 +38,19 @@ int main(void) {
   XColor color;
   Colormap colormap;
 
-  char green[] = "#00FF00";
-  char whiteish[] = "#FAEAEB";
-  char blue[] = "#00D9C8";
-  char pink[] = "#FB8ACC";
-  char yellow[] = "#E5B701";
-  char orange[] = "#DA5F4D";
-  char red[] = "#FB0956";
+  // char whiteish[] = "#FAEAEB";
+  // char blue[] = "#00D9C8";
+  // char pink[] = "#FB8ACC";
+  // char yellow[] = "#E5B701";
+  // char orange[] = "#DA5F4D";
+  // char red[] = "#FB0956";
+
+  // All possible firework colors as hex strings.
+  // @see createFirework() for how this idiocy works.
+  char colors[] = "FAEAEB00D9C8FB8ACCE5B701DA5F4DFB0956";
+
+  // Seed the randomization.
+  srand(time(NULL));
 
   // File descriptor variables for X11 display monitoring.
   int x11_fd;
@@ -59,7 +65,7 @@ int main(void) {
   int fireworks_index = 0;
 
   for (fireworks_index = 0; fireworks_index < MAX_FIREWORKS; fireworks_index++) {
-    createFirework(0, 0, fireworks_index, fireworks);
+    createFirework(0, 0, fireworks_index, colors, fireworks);
   }
 
   // Reset the fireworks index; start with first firework.
@@ -109,7 +115,7 @@ int main(void) {
           fireworks_index = 0;
         }
 
-        createFirework(event.xbutton.x, event.xbutton.y, fireworks_index, fireworks);
+        createFirework(event.xbutton.x, event.xbutton.y, fireworks_index, colors, fireworks);
         updateFireworks(display, window, gc, colormap, color, fireworks);
       }
     } else if (num_ready_fds == 0) {
@@ -128,11 +134,8 @@ int main(void) {
   return 0;
 }
 
-void createFirework(int x, int y, int index, struct Firework *fireworks) {
+void createFirework(int x, int y, int index, char *colors, struct Firework *fireworks) {
   struct Firework fw;
-
-  // TODO: Randomize color.
-  char color[7] = "#DA5F4D";
 
   fw.x = x;
   fw.y = y;
@@ -140,7 +143,38 @@ void createFirework(int x, int y, int index, struct Firework *fireworks) {
   fw.max_radius = 128;
   fw.expand_rate = 12;
 
-  strcpy(fw.color, color);
+  // Define the firework color.
+  char chosen_color[6];
+
+  // This is a completely unnecessary way to get a random color,
+  // but I think it's fun so I'm doing it.
+
+  int colors_length = strlen(colors);
+
+  // A hex color string is always six characters (ignore alpha channel stuff).
+  // Divide the total characters in the colors string by six to find out how
+  // many possible colors there are.
+  int total_colors = (colors_length / 6);
+
+  // Generate a random number between zero and the total possible colors,
+  // then multiply that number by the length of a hex color string (six).
+  int color_offset = ((rand() % total_colors) * 6);
+  // This gives us the character position in the colors string to start from.
+  // Then we just copy the next six characters and we have a usable hex string.
+  strncpy(chosen_color, colors + color_offset, 6);
+
+  // Don't forget this or the hex string won't parse.
+  fw.color[0] = '#';
+
+  // Append the hex string.
+  for (int i = 0; i < 6; i++) {
+    fw.color[i+1] = chosen_color[i];
+  }
+
+  // Terminate that string and we're good to go.
+  fw.color[7] = '\0';
+
+  // printf("FW color %s\n\n", fw.color);
 
   fireworks[index] = fw;
 }
