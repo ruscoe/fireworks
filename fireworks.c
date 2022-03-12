@@ -20,15 +20,14 @@ struct Firework {
   int radius;
   int max_radius;
   int expand_rate;
+  char color[7];
 };
 
 void createFirework(int x, int y, int index, struct Firework *fireworks);
-void updateFireworks(Display *display, Window window, GC gc, struct Firework *fireworks);
+void updateFireworks(Display *display, Window window, GC gc, Colormap colormap, XColor color, struct Firework *fireworks);
 
 int main(void) {
   struct Firework fireworks[MAX_FIREWORKS];
-
-  int fireworks_index = 0;
 
   Display *display;
   Window window;
@@ -48,6 +47,14 @@ int main(void) {
 
   int window_width = 400;
   int window_height = 400;
+
+  // Create initial empty fireworks.
+  int fireworks_index = 0;
+  for (fireworks_index = 0; fireworks_index < MAX_FIREWORKS; fireworks_index++) {
+    createFirework(0, 0, fireworks_index, fireworks);
+  }
+  // Reset the fireworks index; start with first firework.
+  fireworks_index = 0;
 
   // Get the show started.
   display = XOpenDisplay(NULL);
@@ -96,12 +103,13 @@ int main(void) {
         else {
           fireworks_index = 0;
         }
+
         createFirework(event.xbutton.x, event.xbutton.y, fireworks_index, fireworks);
-        updateFireworks(display, window, gc, fireworks);
+        updateFireworks(display, window, gc, colormap, color, fireworks);
       }
     } else if (num_ready_fds == 0) {
       // Timer interval reached; update active fireworks.
-      updateFireworks(display, window, gc, fireworks);
+      updateFireworks(display, window, gc, colormap, color, fireworks);
     }
 
     // Catch any pending events.
@@ -118,21 +126,32 @@ int main(void) {
 void createFirework(int x, int y, int index, struct Firework *fireworks) {
   struct Firework fw;
 
+  // TODO: Consider fireworks that aren't green.
+  char color[7] = "#00FF00";
+
   fw.x = x;
   fw.y = y;
   fw.radius = 12;
   fw.max_radius = 128;
   fw.expand_rate = 12;
 
+  strcpy(fw.color, color);
+
   fireworks[index] = fw;
 }
 
-void updateFireworks(Display *display, Window window, GC gc, struct Firework *fireworks) {
+void updateFireworks(Display *display, Window window, GC gc, Colormap colormap, XColor color, struct Firework *fireworks) {
   struct Firework fw;
   int index;
 
   for (index = 0; index < MAX_FIREWORKS; index++) {
     fw = fireworks[index];
+
+    printf("Index: %i X: %i\n", index, fw.x);
+
+    if (fw.x == 0) {
+      continue;
+    }
 
     XDrawPoint(display, window, gc, fw.x, fw.y);
     XDrawArc(display, window, gc, (fw.x - (fw.radius / 2)), (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
@@ -144,6 +163,8 @@ void updateFireworks(Display *display, Window window, GC gc, struct Firework *fi
     }
     else {
       // TODO: Remove firework.
+      // This is a quick and ugly solution for now.
+      // XFillArc(display, window, gc, (fw.x - (fw.radius / 2)), (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
     }
   }
 }
