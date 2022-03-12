@@ -86,10 +86,16 @@ int main(void) {
     int num_ready_fds = select(x11_fd + 1, &in_fds, NULL, NULL, &tv);
     if (num_ready_fds > 0) {
       if ((event.type == ButtonPress) && (event.xbutton.button == Button1)) {
+        // TODO: Use unique color per firework.
         XSetForeground(display, gc, color.pixel);
-        // XDrawPoint(display, window, gc, event.xbutton.x, event.xbutton.y);
 
         // Create a new firework at the mouse cursor location.
+        if (fireworks_index < (MAX_FIREWORKS - 1)) {
+          fireworks_index++;
+        }
+        else {
+          fireworks_index = 0;
+        }
         createFirework(event.xbutton.x, event.xbutton.y, fireworks_index, fireworks);
         updateFireworks(display, window, gc, fireworks);
       }
@@ -122,21 +128,22 @@ void createFirework(int x, int y, int index, struct Firework *fireworks) {
 }
 
 void updateFireworks(Display *display, Window window, GC gc, struct Firework *fireworks) {
-  struct Firework fw = fireworks[0];
+  struct Firework fw;
+  int index;
 
-  XDrawPoint(display, window, gc, fw.x, fw.y);
+  for (index = 0; index < MAX_FIREWORKS; index++) {
+    fw = fireworks[index];
 
-  XDrawArc(display, window, gc, (fw.x - (fw.radius / 2)), (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
+    XDrawPoint(display, window, gc, fw.x, fw.y);
+    XDrawArc(display, window, gc, (fw.x - (fw.radius / 2)), (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
 
-  // Expand firework radius until maximum is reached.
-  fw.radius += fw.expand_rate;
-  if (fw.radius <= fw.max_radius) {
-    fireworks[0].radius += fw.expand_rate;
+    // Expand firework radius until maximum is reached.
+    fw.radius += fw.expand_rate;
+    if (fw.radius <= fw.max_radius) {
+      fireworks[index].radius += fw.expand_rate;
+    }
+    else {
+      // TODO: Remove firework.
+    }
   }
-  else {
-    // TODO: Remove firework.
-  }
-
-  // Expand radius once for testing.
-  // fireworks[0].radius = 32;
 }
