@@ -37,7 +37,14 @@ int main(void) {
 
   XColor color;
   Colormap colormap;
+
   char green[] = "#00FF00";
+  char whiteish[] = "#FAEAEB";
+  char blue[] = "#00D9C8";
+  char pink[] = "#FB8ACC";
+  char yellow[] = "#E5B701";
+  char orange[] = "#DA5F4D";
+  char red[] = "#FB0956";
 
   // File descriptor variables for X11 display monitoring.
   int x11_fd;
@@ -50,9 +57,11 @@ int main(void) {
 
   // Create initial empty fireworks.
   int fireworks_index = 0;
+
   for (fireworks_index = 0; fireworks_index < MAX_FIREWORKS; fireworks_index++) {
     createFirework(0, 0, fireworks_index, fireworks);
   }
+
   // Reset the fireworks index; start with first firework.
   fireworks_index = 0;
 
@@ -64,8 +73,6 @@ int main(void) {
   }
 
   colormap = DefaultColormap(display, 0);
-  XParseColor(display, colormap, green, &color);
-  XAllocColor(display, colormap, &color);
 
   screen = DefaultScreen(display);
   window = XCreateSimpleWindow(display, RootWindow(display, screen), 10, 10, window_width, window_height, 1,
@@ -93,8 +100,6 @@ int main(void) {
     int num_ready_fds = select(x11_fd + 1, &in_fds, NULL, NULL, &tv);
     if (num_ready_fds > 0) {
       if ((event.type == ButtonPress) && (event.xbutton.button == Button1)) {
-        // TODO: Use unique color per firework.
-        XSetForeground(display, gc, color.pixel);
 
         // Create a new firework at the mouse cursor location.
         if (fireworks_index < (MAX_FIREWORKS - 1)) {
@@ -126,8 +131,8 @@ int main(void) {
 void createFirework(int x, int y, int index, struct Firework *fireworks) {
   struct Firework fw;
 
-  // TODO: Consider fireworks that aren't green.
-  char color[7] = "#00FF00";
+  // TODO: Randomize color.
+  char color[7] = "#DA5F4D";
 
   fw.x = x;
   fw.y = y;
@@ -147,12 +152,16 @@ void updateFireworks(Display *display, Window window, GC gc, Colormap colormap, 
   for (index = 0; index < MAX_FIREWORKS; index++) {
     fw = fireworks[index];
 
-    printf("Index: %i X: %i\n", index, fw.x);
-
     if (fw.x == 0) {
       continue;
     }
 
+    // Set firework color.
+    XParseColor(display, colormap, fw.color, &color);
+    XAllocColor(display, colormap, &color);
+    XSetForeground(display, gc, color.pixel);
+
+    // Draw firework.
     XDrawPoint(display, window, gc, fw.x, fw.y);
     XDrawArc(display, window, gc, (fw.x - (fw.radius / 2)), (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
 
