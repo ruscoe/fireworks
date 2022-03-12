@@ -24,7 +24,6 @@ struct Firework {
 
 void create_firework(int x, int y, int index, struct Firework *fireworks);
 void update_fireworks(Display *display, Window window, GC gc, struct Firework *fireworks);
-void expandFirework(Display *display, Window window, GC gc, int x, int y);
 
 int main(void) {
   struct Firework fireworks[MAX_FIREWORKS];
@@ -127,16 +126,8 @@ void update_fireworks(Display *display, Window window, GC gc, struct Firework *f
 
   XDrawPoint(display, window, gc, fw.x, fw.y);
 
-  XDrawArc(display, window, gc, (fw.x - (fw.radius / 2)),
-    (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
+  XDrawArc(display, window, gc, (fw.x - (fw.radius / 2)), (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
 
-
-
-  // expandFirework(display, window, gc, event.xbutton.x, event.xbutton.y);
-}
-
-void expandFirework(Display *display, Window window, GC gc, int x, int y) {
-  int radius = 12;
-
-  XDrawArc(display, window, gc, (x - (radius / 2)), (y - (radius / 2)), radius, radius, 0, 360 * 64);
+  // Expand radius once for testing.
+  fireworks[0].radius = 32;
 }
