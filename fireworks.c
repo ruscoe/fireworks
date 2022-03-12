@@ -95,7 +95,7 @@ int main(void) {
 
   while(1) {
     // Use timer interval as the refresh rate.
-    tv.tv_usec = 150000;
+    tv.tv_usec = 50000;
     tv.tv_sec = 0;
 
     // Create file descriptor to read input from the X11 display.
