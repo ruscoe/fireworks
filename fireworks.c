@@ -116,7 +116,7 @@ void createFirework(int x, int y, int index, struct Firework *fireworks) {
   fw.y = y;
   fw.radius = 12;
   fw.max_radius = 128;
-  fw.expand_rate = 2;
+  fw.expand_rate = 12;
 
   fireworks[index] = fw;
 }
@@ -128,6 +128,15 @@ void updateFireworks(Display *display, Window window, GC gc, struct Firework *fi
 
   XDrawArc(display, window, gc, (fw.x - (fw.radius / 2)), (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
 
+  // Expand firework radius until maximum is reached.
+  fw.radius += fw.expand_rate;
+  if (fw.radius <= fw.max_radius) {
+    fireworks[0].radius += fw.expand_rate;
+  }
+  else {
+    // TODO: Remove firework.
+  }
+
   // Expand radius once for testing.
-  fireworks[0].radius = 32;
+  // fireworks[0].radius = 32;
 }
