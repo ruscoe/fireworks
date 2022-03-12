@@ -22,8 +22,8 @@ struct Firework {
   int expand_rate;
 };
 
-void create_firework(int x, int y, int index, struct Firework *fireworks);
-void update_fireworks(Display *display, Window window, GC gc, struct Firework *fireworks);
+void createFirework(int x, int y, int index, struct Firework *fireworks);
+void updateFireworks(Display *display, Window window, GC gc, struct Firework *fireworks);
 
 int main(void) {
   struct Firework fireworks[MAX_FIREWORKS];
@@ -90,12 +90,12 @@ int main(void) {
         // XDrawPoint(display, window, gc, event.xbutton.x, event.xbutton.y);
 
         // Create a new firework at the mouse cursor location.
-        create_firework(event.xbutton.x, event.xbutton.y, fireworks_index, fireworks);
-        update_fireworks(display, window, gc, fireworks);
+        createFirework(event.xbutton.x, event.xbutton.y, fireworks_index, fireworks);
+        updateFireworks(display, window, gc, fireworks);
       }
     } else if (num_ready_fds == 0) {
       // Timer interval reached; update active fireworks.
-      update_fireworks(display, window, gc, fireworks);
+      updateFireworks(display, window, gc, fireworks);
     }
 
     // Catch any pending events.
@@ -109,7 +109,7 @@ int main(void) {
   return 0;
 }
 
-void create_firework(int x, int y, int index, struct Firework *fireworks) {
+void createFirework(int x, int y, int index, struct Firework *fireworks) {
   struct Firework fw;
 
   fw.x = x;
@@ -121,7 +121,7 @@ void create_firework(int x, int y, int index, struct Firework *fireworks) {
   fireworks[index] = fw;
 }
 
-void update_fireworks(Display *display, Window window, GC gc, struct Firework *fireworks) {
+void updateFireworks(Display *display, Window window, GC gc, struct Firework *fireworks) {
   struct Firework fw = fireworks[0];
 
   XDrawPoint(display, window, gc, fw.x, fw.y);
