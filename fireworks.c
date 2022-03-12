@@ -24,7 +24,7 @@ struct Firework {
 };
 
 void createFirework(int x, int y, int index, char *colors, struct Firework *fireworks);
-void updateFireworks(Display *display, Window window, GC gc, Colormap colormap, XColor color, struct Firework *fireworks);
+void updateFireworks(Display *display, int screen, Window window, GC gc, Colormap colormap, XColor color, struct Firework *fireworks);
 
 int main(void) {
   struct Firework fireworks[MAX_FIREWORKS];
@@ -116,11 +116,11 @@ int main(void) {
         }
 
         createFirework(event.xbutton.x, event.xbutton.y, fireworks_index, colors, fireworks);
-        updateFireworks(display, window, gc, colormap, color, fireworks);
+        updateFireworks(display, screen, window, gc, colormap, color, fireworks);
       }
     } else if (num_ready_fds == 0) {
       // Timer interval reached; update active fireworks.
-      updateFireworks(display, window, gc, colormap, color, fireworks);
+      updateFireworks(display, screen, window, gc, colormap, color, fireworks);
     }
 
     // Catch any pending events.
@@ -179,7 +179,7 @@ void createFirework(int x, int y, int index, char *colors, struct Firework *fire
   fireworks[index] = fw;
 }
 
-void updateFireworks(Display *display, Window window, GC gc, Colormap colormap, XColor color, struct Firework *fireworks) {
+void updateFireworks(Display *display, int screen, Window window, GC gc, Colormap colormap, XColor color, struct Firework *fireworks) {
   struct Firework fw;
   int index;
 
@@ -196,18 +196,24 @@ void updateFireworks(Display *display, Window window, GC gc, Colormap colormap, 
     XSetForeground(display, gc, color.pixel);
 
     // Draw firework.
-    XDrawPoint(display, window, gc, fw.x, fw.y);
     XDrawArc(display, window, gc, (fw.x - (fw.radius / 2)), (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
 
+    // Erase previous circle.
+    int prev_radius = (fw.radius - fw.expand_rate);
+    XSetForeground(display, gc, BlackPixel(display, screen));
+    XDrawArc(display, window, gc, (fw.x - (prev_radius / 2)), (fw.y - (prev_radius / 2)), prev_radius, prev_radius, 0, 360 * 64);
+
     // Expand firework radius until maximum is reached.
-    fw.radius += fw.expand_rate;
-    if (fw.radius <= fw.max_radius) {
-      fireworks[index].radius += fw.expand_rate;
+    int next_radius = (fw.radius + fw.expand_rate);
+
+    if (next_radius <= fw.max_radius) {
+      fireworks[index].radius = next_radius;
     }
     else {
-      // TODO: Remove firework.
-      // This is a quick and ugly solution for now.
-      // XFillArc(display, window, gc, (fw.x - (fw.radius / 2)), (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
+      // Remove firework.
+      XSetForeground(display, gc, BlackPixel(display, screen));
+      XDrawArc(display, window, gc, (fw.x - (fw.radius / 2)), (fw.y - (fw.radius / 2)), fw.radius, fw.radius, 0, 360 * 64);
+      fireworks[index].x = 0;
     }
   }
 }
