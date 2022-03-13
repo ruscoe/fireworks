@@ -14,6 +14,8 @@ gcc -o fireworks fireworks.c -lX11
 ./fireworks
 ```
 
+![Fireworks](http://ruscoe.org/assets/images/misc/github/fireworks.gif)
+
 ## Customization
 
 ### Add colors
