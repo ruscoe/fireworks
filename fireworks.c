@@ -87,6 +87,7 @@ int main(void) {
   gc = DefaultGC(display, screen);
 
   XMapWindow(display, window);
+  XStoreName(display, window, "Fireworks!");
 
   // Get a connection to the X11 display as a file description to monitor events.
   x11_fd = ConnectionNumber(display);
