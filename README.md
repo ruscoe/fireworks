@@ -14,7 +14,7 @@ gcc -o fireworks fireworks.c -lX11
 ./fireworks
 ```
 
-![Fireworks](http://ruscoe.org/assets/images/misc/github/fireworks.gif)
+![fireworks](https://user-images.githubusercontent.com/87952/198073957-87f0de66-6afb-4fce-ae1a-5e9efcef5d03.gif)
 
 Click anywhere to generate a firework. Click multiple times for a pretty
 firework.
