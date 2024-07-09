@@ -1,9 +1,12 @@
 # Fireworks
 
 A little C program you can use to create your own mini firework display.
-Requires [Xlib](https://en.wikipedia.org/wiki/Xlib).
 
-Only tested on Ubuntu 21.10, but should work anywhere Xlib does.
+Tested on [Ubuntu 22.04.4 LTS](https://ubuntu.com/) with gcc version 11.4.0.
+
+## Requirements
+- [gcc](https://gcc.gnu.org/)
+- [Xlib](https://en.wikipedia.org/wiki/Xlib)
 
 ## Usage
 
